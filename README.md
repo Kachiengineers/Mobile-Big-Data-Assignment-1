@@ -1,168 +1,63 @@
-📊 Overview
-This project analyzes mobile phone activity data (SMS, calls, and internet usage) aggregated across geographical grid cells in Milan, Italy. The dataset spans multiple days and provides insights into communication patterns, temporal trends, and geographical variations.
+# README: Mobile Phone Activity Data Analysis
 
-🎯 Objectives
-Load, clean, and merge multiple daily datasets
+## Overview of Approach
 
-Analyze temporal patterns in communication activity
+The primary objective of this analysis was to load, clean, and explore a dataset composed of mobile phone activity (SMS, calls, internet usage) aggregated across geographical grid cells in Milan, Italy. The analysis involved combining data from multiple days, handling missing values, extracting temporal features, and performing various statistical comparisons to understand usage patterns.
 
-Compare domestic vs. international communication patterns
+### Steps Taken:
+1.  **Data Loading and Merging**: Three daily CSV files (`sms-call-internet-mi-2013-11-02.csv`, `sms-call-internet-mi-2013-11-04.csv`, `sms-call-internet-mi-2013-11-06.csv`) were loaded and vertically concatenated into a single, comprehensive DataFrame.
+2.  **Data Cleaning and Preparation**: The merged dataset was prepared for analysis by converting the 'datetime' column to a proper datetime object, extracting 'date' and 'time' components, and handling missing numerical values.
+3.  **Feature Engineering**: Aggregate columns for 'total sms' (sum of incoming and outgoing SMS) and 'total calls' (sum of incoming and outgoing calls) were created.
+4.  **Descriptive Statistics**: Basic exploratory data analysis was performed to understand the dataset's shape, column types, and statistical summaries of numerical features.
+5.  **Query Answering**: Specific questions were addressed, including counts of records, unique CellIDs, and country codes.
+6.  **Hourly Activity Analysis**: Overall activity was analyzed on an hourly basis to identify peak and lowest activity periods, and detailed statistics for total calls per hour were computed.
+7.  **Daytime vs. Nighttime Activity**: Activity was segmented into daytime (6 am - 8 pm) and nighttime (8 pm - 6 am) to calculate the percentage of total activity occurring in each period.
+8.  **Domestic vs. International Call Comparison**: Calls were categorized as 'Domestic' (countrycode 39) or 'International' (all other countrycodes) to compare their hourly patterns, distribution, and incoming/outgoing ratios.
+9.  **Correlation Analysis**: The correlation between SMS volume and Call volume at the grid level was calculated and visualized.
 
-Investigate correlations between different types of mobile activities
+## Key Decisions Made
 
-Identify peak usage periods and geographical patterns
+1.  **Missing Value Imputation**: Given the substantial number of missing values across activity-related columns (`smsin`, `smsout`, `callin`, `callout`, `internet`), the decision was made to impute these `NaN` values with the *mean* of their respective columns. This approach was chosen to retain as much data as possible, despite the high proportion of missing data, ensuring that statistical analyses could be performed without excluding a large number of records. This impacted 5,880,441 rows.
 
-📁 Dataset Description
-Source: Daily CSV files containing mobile phone activity data for Milan
-Files Used:
+2.  **Date and Time Extraction**: The 'datetime' column was explicitly converted to `datetime` objects. Subsequently, 'date' and 'time' columns were extracted, along with a crucial 'hour' column. This `hour` column was fundamental for all time-based aggregations and pattern analyses.
 
-sms-call-internet-mi-2013-11-02.csv
+3.  **Activity Aggregation**: New columns, 'total sms' and 'total calls', were created by summing their incoming and outgoing components. This simplified the overall activity measurement for SMS and calls, making it easier to analyze general communication volumes.
 
-sms-call-internet-mi-2013-11-04.csv
+4.  **Domestic/International Call Classification**: Italy's country code (39) was used as the sole criterion to distinguish 'Domestic' from 'International' calls. This clear-cut classification was vital for comparing communication patterns originating within and outside Italy.
 
-sms-call-internet-mi-2013-11-06.csv
+5.  **Visualization Choices**: Line plots were primarily used for displaying hourly trends (overall activity, domestic vs. international calls) due to their effectiveness in showing temporal patterns. Scatter plots were employed for correlation analysis (SMS vs. Call volume) to visually represent the relationship between two continuous variables.
 
-Key Columns:
+## Summary of Key Findings
 
-CellID: Geographical grid square identifier (10,000 unique squares)
+### Dataset Overview:
+*   **Total Records**: The combined dataset contains **6,564,031** records.
+*   **Unique Grid Squares (CellID)**: There are **10,000** unique geographical grid squares represented in the data.
+*   **Unique Country Codes**: The dataset includes activities related to **302** unique country codes.
 
-datetime: Timestamp of activity
+### Missing Values:
+*   Initial analysis revealed significant missing data: 'smsout' (5,025,738), 'callin' (4,761,685), 'smsin' (3,964,171), 'internet' (3,621,117), and 'callout' (3,764,484).
+*   The 'smsout' column had the most missing values.
+*   A total of **5,880,441** records had at least one missing value across these activity columns.
+*   All missing values were successfully imputed with the mean of their respective columns, resulting in zero missing values post-imputation.
 
-smsin, smsout: Incoming and outgoing SMS counts
+### Hourly Activity Patterns:
+*   **Overall Peak Activity Hour**: The most common peak hour across all grids for total activity (SMS, calls, internet combined) is **17:00 (5 PM)**.
+*   **Overall Lowest Activity Hour**: The hour with the lowest total activity is **04:00 (4 AM)**.
+*   **Descriptive Statistics for Total Calls by Hour**: Showed high variability, with maximum values significantly exceeding means and medians in certain hours, indicating occasional extreme activity spikes.
 
-callin, callout: Incoming and outgoing call durations
+### Daytime vs. Nighttime Activity:
+*   **Daytime Activity (6 AM - 8 PM)**: Accounts for **78.51%** of the total activity.
+*   **Nighttime Activity (8 PM - 6 AM)**: Accounts for **21.49%** of the total activity.
 
-internet: Internet traffic volume
+### Domestic vs. International Communication:
+*   **Hourly Patterns**: International calls exhibit a flatter distribution throughout the day with a peak around **12:00**, maintaining relatively higher activity during hours when domestic calls are low. Domestic calls show a more pronounced diurnal pattern, peaking around **17:00** and significantly dropping during early morning hours.
+*   **Call Type Distribution**:
+    *   Domestic Calls: **33.11%** of total calls.
+    *   International Calls: **66.89%** of total calls.
+*   **SMS Type Distribution**:
+    *   Domestic SMS: **24.98%** of total SMS.
+    *   International SMS: **75.02%** of total SMS.
+*   **International Calls Incoming vs. Outgoing**: The ratio of International Incoming Calls to Outgoing Calls is **1.67**, indicating that incoming international calls are more frequent than outgoing international calls.
 
-countrycode: Originating/destination country code
-
-🔧 Methodology
-1. Data Loading and Merging
-Loaded three daily CSV files
-
-Vertically concatenated into a single DataFrame
-
-Final dataset size: 6,564,031 records
-
-2. Data Cleaning and Preparation
-python
-# Key transformations:
-- Converted 'datetime' column to datetime objects
-- Extracted 'date', 'time', and 'hour' components
-- Created aggregate columns: 'total_sms' and 'total_calls'
-3. Missing Value Handling
-Challenge: Significant missing values across activity columns:
-
-smsout: 5,025,738 missing
-
-callin: 4,761,685 missing
-
-smsin: 3,964,171 missing
-
-internet: 3,621,117 missing
-
-callout: 3,764,484 missing
-
-Solution: Imputed all missing values with column means (affecting 5,880,441 records)
-
-4. Feature Engineering
-Created total_sms = smsin + smsout
-
-Created total_calls = callin + callout
-
-Added activity_type classification (Domestic/International)
-
-Added time_period classification (Daytime/Nighttime)
-
-📈 Key Findings
-📊 Dataset Statistics
-Total Records: 6,564,031
-
-Unique Grid Squares (CellID): 10,000
-
-Unique Country Codes: 302
-
-Missing Values (pre-imputation): 5,880,441 records with at least one missing value
-
-⏰ Temporal Patterns
-Metric	Finding
-Peak Activity Hour	17:00 (5 PM)
-Lowest Activity Hour	04:00 (4 AM)
-Daytime Activity (6 AM - 8 PM)	78.51% of total activity
-Nighttime Activity (8 PM - 6 AM)	21.49% of total activity
-🌍 Domestic vs. International Patterns
-Call Distribution
-Type	Percentage	Pattern
-Domestic Calls	33.11%	Pronounced diurnal pattern, peaks at 17:00
-International Calls	66.89%	Flatter distribution, peaks at 12:00
-SMS Distribution
-Type	Percentage
-Domestic SMS	24.98%
-International SMS	75.02%
-International Call Direction
-Incoming/Outgoing Ratio: 1.67
-
-Interpretation: Incoming international calls are 67% more frequent than outgoing international calls
-
-🔗 Correlation Analysis
-SMS vs. Call Volume Correlation: 0.98624 (strong positive)
-
-Interpretation: Grid squares with high SMS activity also tend to have high call activity, indicating general communication intensity in certain areas
-
-📊 Visualizations Created
-Hourly Activity Trends - Line plots showing overall activity patterns
-
-Domestic vs. International Hourly Patterns - Comparative line plots
-
-SMS vs. Call Volume Correlation - Scatter plot with regression line
-
-Activity Distribution by Time Period - Bar charts
-
-🧠 Key Insights
-Evening Peak: Communication peaks around 5 PM, aligning with end of workday
-
-International Dominance: International communications significantly outweigh domestic ones
-
-Geographical Consistency: High correlation between SMS and call volumes suggests consistent communication hotspots
-
-Nighttime Quiet: Minimal activity between 2 AM - 5 AM
-
-Call Direction Imbalance: More incoming than outgoing international calls
-
-🛠️ Technical Stack
-Python Libraries: pandas, numpy, matplotlib, seaborn
-
-Data Processing: Data merging, cleaning, imputation, feature engineering
-
-Analysis Techniques: Descriptive statistics, correlation analysis, time series analysis, comparative analysis
-
-📝 Project Structure
-text
-project/
-│
-├── data/                    # Raw data files
-├── notebooks/               # Jupyter notebooks for analysis
-├── scripts/                 # Python scripts for processing
-├── results/                 # Output files and visualizations
-├── README.md               # This file
-└── requirements.txt        # Dependencies
-🚀 Getting Started
-bash
-# Clone repository
-git clone <repository-url>
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run analysis
-python scripts/analyze_mobile_activity.py
-🔍 Future Work
-Incorporate more days for longitudinal analysis
-
-Add weather data to explore environmental impacts
-
-Implement machine learning for activity prediction
-
-Analyze spatial patterns using geographical visualization
-
-Investigate weekend vs. weekday patterns
+### Correlation between SMS and Call Volume:
+*   There is a **strong positive correlation (0.98624)** between SMS volume and Call volume at the grid level. This suggests that grid squares with higher SMS activity also tend to have higher call activity, indicating a general intensity of communication in those areas.
